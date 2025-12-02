@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alamanese</title>
+
+<style>
+body {
+  background:#8a0000;
+  color:white;
+  font-family:Arial;
+  margin:0; padding:0;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
+#lock {
+  text-align:center;
+}
+
+input, button {
+  padding:10px;
+  border-radius:6px;
+  border:none;
+}
+
+input {
+  width:220px;
+  border:2px solid #ff4d4d;
+  background:#330000;
+  color:white;
+}
+
+button {
+  background:#ff4d4d;
+  color:white;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+#msg { height:20px; margin-top:10px; }
+
+#translator {
+  position:absolute;
+  bottom:-100%;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#660000;
+  transition:bottom 0.6s ease;
+  padding:20px;
+  overflow-y:auto;
+  box-sizing:border-box;
+}
+
+#secretPanel {
+  display:none;
+  margin-top:20px;
+  padding:15px;
+  background:#440000;
+  border-radius:8px;
+}
+
+.folder {
+  background:#550000;
+  padding:10px;
+  border-radius:6px;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+.content {
+  display:none;
+  padding:10px;
+  background:#300000;
+  margin-top:5px;
+  border-radius:6px;
+}
+
+textarea {
+  width:100%;
+  height:120px;
+  margin-top:10px;
+  background:#330000;
+  border:2px solid #ff4d4d;
+  color:white;
+  border-radius:6px;
+  padding:10px;
+}
+
+.small {
+  padding:6px 10px;
+  background:#aa0000;
+}
+</style>
+</head>
+
+<body>
+<div id="lock">
+  <h3>Enter Password</h3>
+  <input id="pw">
+  <br>
+  <button onclick="enter()">Enter</button>
+  <div id="msg"></div>
+</div>
+
+<div id="translator">
+  <h2>Alamanese Translator</h2>
+  <textarea id="in" placeholder="Type English here..."></textarea>
+  <button onclick="translateText()">Translate →</button>
+  <textarea id="out" placeholder="Alamanese output..."></textarea>
+
+  <br><br>
+
+  <input id="secretPw" placeholder="Owner Access Password" style="width:250px;">
+  <button onclick="openSecret()">Open Secret Panel</button>
+
+  <div id="secretPanel">
+    <h2>CLASSIFIED // OWNER ACCESS</h2>
+
+    <div class="folder" onclick="toggleFolder('f1')">IVA Identity Document</div>
+    <div id="f1" class="content">
+      The identity of the leader called ‘IVA’ has not been revealed to the lower class. 
+      The higher‑ups know the true identity of the so‑called ‘IVA’ (Amodelak).
+    </div>
+
+    <div class="folder" onclick="toggleFolder('f2')">ALAMA Missions File</div>
+    <div id="f2" class="content">
+      The main mission of ALAMA is to spy on our worst enemy, Jeff. 
+      The militia of ALAMA is working on recon efforts and finding his associates, 
+      while the criminal section is focused on securing funds to track him. 
+      Current intelligence suggests activity in Cuba. Recon deployment pending.
+    </div>
+
+    <div class="folder" onclick="toggleFolder('f3')">LEVEL 10 SECURITY — INCIDENT REPORT 47‑B</div>
+    <div id="f3" class="content">
+      <strong>CLASSIFICATION:</strong> Maximum Clearance — ALAMA Command Only<br>
+      <strong>TIME:</strong> 14:30<br><br>
+
+      During thermal system maintenance, Squadron One detected a figure 200 meters east of HQ. 
+      Drones approached, and the individual fled into tree cover, deploying heated decoys.
+      One squadron member suffered minor burns when a decoy detonated unexpectedly.
+
+      Squadron Two conducted a search but found no trace. 
+      A high‑value perimeter sensor was later discovered stolen.
+      Incident remains under investigation.
+    </div>
+
+    <hr style="margin-top:20px; border-color:#550000;">
+
+    <!-- LOG UNLOCK -->
+    <div style="margin-top:10px;">
+      <input id="logPw" type="password" placeholder="Enter Level 10 Clearance (MA02)" 
+      style="padding:6px; width:220px; background:#330000; border:1px solid #ff4d4d; color:white;">
+      <button class="small" onclick="unlockLog()">Unlock Log</button>
+    </div>
+
+    <!-- HIDDEN LOG -->
+    <div id="logSection" style="margin-top:15px; padding:10px; background:#220000; border-radius:6px; display:none;">
+      <strong>ACCESS LOG:</strong>
+      <ul id="accessLog" style="list-style-type:none; padding-left:10px; max-height:150px; overflow-y:auto;"></ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// MAIN PASSWORDS
+const translatorPassword = 'alama02';
+const ownerPassword = 'uIet qtlpz cdodydpz 4';
+const secondaryLogPassword = 'MA02';
+
+// PASSWORD GATE
+function enter(){
+  let p = document.getElementById('pw').value;
+  let msg = document.getElementById('msg');
+
+  if(p === translatorPassword){
+    msg.textContent = "Translator access granted";
+    document.getElementById('translator').style.bottom = '0';
+  } else if(p === ownerPassword){
+    msg.textContent = "Owner access granted — Secret panel unlocked";
+    document.getElementById('secretPanel').style.display = 'block';
+  } else {
+    msg.textContent = "Password wrong";
+    setTimeout(()=> msg.textContent="", 4000);
+  }
+}
+
+// ALAMANESE CIPHER
+const cipher = {
+  a:"j",b:"m",c:"l",d:"c",e:"t",f:"r",g:"c",
+  h:"v",i:"d",j:"f",k:"s",l:"a",m:"w",n:"z",
+  o:"p",p:"e",q:"g",r:"q",s:"y",t:"u",u:"n",
+  v:"o",w:"k",x:"h",y:"I",z:"bu"
+};
+
+function translateText(){
+  let input = document.getElementById('in').value.toLowerCase();
+  let out = "";
+
+  for(let ch of input){
+    if(cipher[ch]) out += cipher[ch];
+    else out += ch;
+  }
+  document.getElementById('out').value = out;
+}
+
+// OPEN SECRET PANEL BUTTON (REDAUNDANT, optional)
+function openSecret(){
+  let p = document.getElementById('secretPw').value;
+  if(p === ownerPassword){
+    document.getElementById('secretPanel').style.display = 'block';
+  } else {
+    alert("Incorrect owner password.");
+  }
+}
+
+// FOLDER TOGGLE + LOGGING
+function toggleFolder(id){
+  const el = document.getElementById(id);
+  const open = el.style.display !== 'block';
+  el.style.display = open ? 'block' : 'none';
+
+  if(open){
+    const log = document.getElementById('accessLog');
+    const name = document.querySelector(`[onclick="toggleFolder('${id}')"]`).textContent;
+    const time = new Date().toLocaleTimeString();
+    const li = document.createElement('li');
+    li.textContent = `${time} — Opened ${name}`;
+    log.appendChild(li);
+  }
+}
+
+// LOG UNLOCK
+function unlockLog(){
+  const pw = document.getElementById('logPw').value;
+  if(pw === secondaryLogPassword){
+    document.getElementById('logSection').style.display = 'block';
+    document.getElementById('logPw').value = '';
+    alert('Level 10 clearance granted.');
+  } else {
+    alert('Incorrect clearance level.');
+    document.getElementById('logPw').value = '';
+  }
+}
+</script>
+
+</body>
+</html>
