@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alamanese</title>
+<style>
+body {
+  background:#8a0000;
+  color:white;
+  font-family:Arial, Helvetica, sans-serif;
+  margin:0;
+  padding:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  flex-direction:column;
+  box-sizing:border-box;
+}
+#lock { text-align:center; margin-top:24px; }
+input[type="password"], input[type="text"] {
+  padding:10px;
+  width:220px;
+  border-radius:6px;
+  border:2px solid #ff4d4d;
+  background:#330000;
+  color:white;
+  margin-top:6px;
+}
+button {
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#ff4d4d;
+  color:white;
+  margin-top:8px;
+}
+#msg { margin-top:10px; height:20px; color:#ffd4d4; }
+#translator, #secretPanel {
+  position:relative;
+  width:90%;
+  max-width:700px;
+  background:#660000;
+  border-radius:8px;
+  padding:20px;
+  margin:20px auto;
+  display:none;
+  box-sizing:border-box;
+}
+textarea {
+  width:100%;
+  min-height:120px;
+  margin-top:10px;
+  background:#330000;
+  border:2px solid #ff4d4d;
+  color:white;
+  border-radius:6px;
+  padding:10px;
+  box-sizing:border-box;
+  resize:vertical;
+}
+h2,h3 { margin:6px 0; text-align:center; }
+.folder { cursor:pointer; margin:10px 0; font-weight:bold; }
+.folderContent { display:none; padding:10px; background:#220000; border-radius:6px; margin-bottom:10px; }
+.controls { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+.small { padding:6px 10px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="lock">
+  <h3>Enter Password</h3>
+  <input id="pw" type="password" placeholder="Password">
+  <br>
+  <button onclick="enter()">Enter</button>
+  <div id="msg"></div>
+</div>
+
+<!-- TRANSLATOR SCREEN -->
+<div id="translator">
+  <h2>Alamanese Translator</h2>
+  <textarea id="in" placeholder="Type English here..."></textarea>
+  <div class="controls">
+    <button class="small" onclick="translateText()">Translate →</button>
+    <button class="small" onclick="clearText()">Clear</button>
+  </div>
+  <textarea id="out" placeholder="Alamanese output..."></textarea>
+  <div class="controls">
+    <button class="small" onclick="copyOutput()">Copy</button>
+  </div>
+</div>
+
+<!-- SECRET PANEL -->
+<div id="secretPanel">
+  <h3 style="text-align:center; color:#ffd700;">TOP-SECRET — OWNER ACCESS</h3>
+
+  <!-- Folder 1 -->
+  <div class="folder" onclick="toggleFolder('folder1Content')">📁 CLASSIFIED PERSONNEL REPORT — IVA IDENTITY</div>
+  <div id="folder1Content" class="folderContent">
+    The identity of the leader known as <strong>“IVA”</strong> has <strong>not</strong> been disclosed to lower-class personnel. Only upper-tier command members possess authorization to access the true designation of the so-called <strong>“IVA” (Amodelak)</strong>. Unauthorized inquiries into this matter will result in immediate disciplinary review.
+  </div>
+
+  <!-- Folder 2 -->
+  <div class="folder" onclick="toggleFolder('folder2Content')">📁 ALAMA OPERATIONS DIVISION — MISSIONS</div>
+  <div id="folder2Content" class="folderContent">
+    The primary mission objective of <strong>ALAMA</strong> is the surveillance and assessment of our highest-priority adversary, <strong>Jeff</strong>. ALAMA militia units have been assigned ongoing reconnaissance operations, focusing on identifying his known and potential associates. The Criminal Affairs Division is tasked with resource acquisition and operational funding efforts to accelerate the search.<br><br>
+    Recent intelligence reports have revealed substantial evidence linked to activity in <strong>Cuba</strong>. A recon deployment has been authorized, and operational units will commence field activity shortly. Upon successful confirmation, further action will be executed for the satisfaction and directive of <strong>IVA</strong>.
+  </div>
+</div>
+
+<script>
+// ALAMANASE CIPHER
+const cipherMap = {
+  'A':'j','B':'m','C':'l','D':'c','E':'t','F':'r',
+  'G':'c','H':'v','I':'d','J':'f','K':'s','L':'a',
+  'M':'w','N':'z','O':'p','P':'e','Q':'g','R':'q',
+  'S':'y','T':'u','U':'n','V':'o','W':'k','X':'h',
+  'Y':'I','Z':'bu'
+};
+
+// PASSWORDS
+const mainPassword = 'alama02';
+const ownerPassword = 'uIet qtlpz cdodydpz 4';
+
+function enter(){
+  const p = document.getElementById('pw').value;
+  const msg = document.getElementById('msg');
+
+  if(p === ownerPassword){          // owner password checked first
+    msg.textContent = "Owner access granted — Secret panel unlocked";
+    document.getElementById('secretPanel').style.display = 'block';
+  } else if(p === mainPassword){
+    msg.textContent = "Access granted — Translator unlocked";
+    document.getElementById('translator').style.display = 'block';
+  } else {
+    msg.textContent = "Password wrong";
+    setTimeout(()=> msg.textContent="", 4000);
+  }
+}
+
+// TRANSLATE FUNCTION
+function translateText(){
+  let text = document.getElementById('in').value.toUpperCase();
+  let result = '';
+  for(let char of text){
+    if(cipherMap[char]){
+      result += cipherMap[char];
+    } else {
+      result += char;
+    }
+  }
+  document.getElementById('out').value = result;
+}
+
+// CLEAR FUNCTION
+function clearText(){
+  document.getElementById('in').value = '';
+  document.getElementById('out').value = '';
+}
+
+// COPY FUNCTION
+function copyOutput(){
+  const out = document.getElementById('out');
+  out.select();
+  navigator.clipboard.writeText(out.value);
+  alert('Copied to clipboard!');
+}
+
+// TOGGLE FOLDER
+function toggleFolder(id){
+  const el = document.getElementById(id);
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+</script>
+
+</body>
+</html>
